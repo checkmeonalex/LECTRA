@@ -4,6 +4,6 @@
 //  Expo Go on phone (same WiFi):   'http://172.29.152.146:3000'
 //  Production (deployed):          'https://your-backend.railway.app'
 //
-const BACKEND_URL = 'http://localhost:3000';
+const BACKEND_URL = 'https://lectra-production.up.railway.app';
 
 export default BACKEND_URL;
