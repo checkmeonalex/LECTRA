@@ -1,9 +1,14 @@
 export const Colors = {
-  primary: '#000000',
-  background: '#ffffff',
-  text: '#000000',
-  textSecondary: '#60646C',
+  primary: '#111827',
+  background: '#0f1923',
+  surface: '#ffffff',
+  text: '#111827',
+  textSecondary: '#888888',
+  textLight: '#ffffff',
+  accent: '#F472B6',
+  accentGreen: '#6EE7B7',
   border: '#E0E0E0',
+  inputBg: '#F5F5F5',
 } as const;
 
 export const Spacing = {
