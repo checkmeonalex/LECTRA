@@ -33,7 +33,7 @@ export default function LoginScreen() {
     try {
       const data = await portalLogin(matric.trim(), password);
       await AsyncStorage.setItem('student_data', JSON.stringify(data));
-      router.replace('/dashboard');
+      router.replace('/home');
     } catch (err: any) {
       Alert.alert('Login Failed', err.message ?? 'Something went wrong.');
     } finally {

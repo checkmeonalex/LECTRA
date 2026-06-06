@@ -217,10 +217,70 @@ app.post('/login', async (req, res) => {
       courseInfo = parsed.infoFields;
     }
 
+    console.log('FIELDS:', biodataFields.map(f => `${f.label}: ${f.value}`));
+    console.log('COURSEINFO:', courseInfo);
     return res.json({ fields: biodataFields, courses, totalUnits, courseInfo, homeStatus });
 
   } catch (err) {
     console.error(err.message);
+    return res.status(500).json({ message: err.message });
+  }
+});
+
+// ── news ───────────────────────────────────────────────────────────────────
+
+const NEWS_BASE = 'https://yabatech.edu.ng';
+let newsCache = { data: null, at: 0 };
+const NEWS_TTL = 10 * 60 * 1000; // 10 minutes
+
+function parseNews(html) {
+  const items = [];
+  const liBlocks = html.match(/<li[\s>][\s\S]*?<\/li>/gi) || [];
+
+  for (const li of liBlocks) {
+    // title + article href
+    const titleM = li.match(/<h4[^>]*>[\s\S]*?<a[^>]+href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/i);
+    if (!titleM) continue;
+    const href  = titleM[1].startsWith('http') ? titleM[1] : `${NEWS_BASE}/${titleM[1].replace(/^\//, '')}`;
+    const title = titleM[2].replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+    if (!title) continue;
+
+    // date
+    const dateM = li.match(/<time[^>]*>([\s\S]*?)<\/time>/i);
+    const date  = dateM ? dateM[1].trim() : '';
+
+    // image
+    const imgM  = li.match(/<img[^>]+src=["']([^"']+)["']/i);
+    const image = imgM
+      ? (imgM[1].startsWith('http') ? imgM[1] : `${NEWS_BASE}/${imgM[1].replace(/^\//, '')}`)
+      : null;
+
+    items.push({ title, date, href, image });
+  }
+
+  return items;
+}
+
+app.get('/news', async (req, res) => {
+  try {
+    const now = Date.now();
+    if (newsCache.data && now - newsCache.at < NEWS_TTL) {
+      return res.json(newsCache.data);
+    }
+
+    const r = await axios.get(`${NEWS_BASE}/yabatechallnews.php`, {
+      headers: { 'User-Agent': UA },
+      validateStatus: () => true,
+      timeout: 10000,
+    });
+
+    const items = parseNews(r.data);
+    if (!items.length) return res.status(502).json({ message: 'No news parsed.' });
+
+    newsCache = { data: items, at: now };
+    return res.json(items);
+  } catch (err) {
+    console.error('News fetch error:', err.message);
     return res.status(500).json({ message: err.message });
   }
 });
