@@ -235,21 +235,25 @@ const NEWS_TTL = 10 * 60 * 1000; // 10 minutes
 
 function parseNews(html) {
   const items = [];
-  const liBlocks = html.match(/<li[\s>][\s\S]*?<\/li>/gi) || [];
+  const liBlocks = html.match(/<li>[\s\S]*?<\/li>/gi) || [];
 
   for (const li of liBlocks) {
-    // title + article href
-    const titleM = li.match(/<h4[^>]*>[\s\S]*?<a[^>]+href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/i);
+    // href from image anchor
+    const hrefM = li.match(/href=["'](yabatechnews\.php[^"']+)["']/i);
+    if (!hrefM) continue;
+    const href = `${NEWS_BASE}/${hrefM[1]}`;
+
+    // title is in <p> inside latest-research-content
+    const titleM = li.match(/<p>([\s\S]*?)<\/p>/i);
     if (!titleM) continue;
-    const href  = titleM[1].startsWith('http') ? titleM[1] : `${NEWS_BASE}/${titleM[1].replace(/^\//, '')}`;
-    const title = titleM[2].replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+    const title = titleM[1].replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
     if (!title) continue;
 
-    // date
-    const dateM = li.match(/<time[^>]*>([\s\S]*?)<\/time>/i);
+    // date is in <h4>
+    const dateM = li.match(/<h4>([\s\S]*?)<\/h4>/i);
     const date  = dateM ? dateM[1].trim() : '';
 
-    // image
+    // image src
     const imgM  = li.match(/<img[^>]+src=["']([^"']+)["']/i);
     const image = imgM
       ? (imgM[1].startsWith('http') ? imgM[1] : `${NEWS_BASE}/${imgM[1].replace(/^\//, '')}`)
