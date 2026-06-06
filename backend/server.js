@@ -289,6 +289,58 @@ app.get('/news', async (req, res) => {
   }
 });
 
+// ── single article ─────────────────────────────────────────────────────────
+// GET /article?url=https://yabatech.edu.ng/yabatechnews.php?id=...
+
+app.get('/article', async (req, res) => {
+  const { url } = req.query;
+  if (!url) return res.status(400).json({ message: 'url param required.' });
+
+  try {
+    const r = await axios.get(url, {
+      headers: { 'User-Agent': UA },
+      validateStatus: () => true,
+      timeout: 10000,
+    });
+    const html = r.data;
+
+    // title
+    const h1M  = html.match(/<h1>([\s\S]*?)<\/h1>/i);
+    const title = h1M ? h1M[1].replace(/<[^>]+>/g, '').trim() : '';
+
+    // date — text after fa-clock icon
+    const clockM = html.match(/fa-clock[^<]*<\/i>([\s\S]*?)<\/a>/i);
+    const date   = clockM ? clockM[1].replace(/<[^>]+>/g, '').trim() : '';
+
+    // category — text after fa-tags icon
+    const tagM    = html.match(/fa-tags[^<]*<\/i>([\s\S]*?)<\/a>/i);
+    const category = tagM ? tagM[1].replace(/<[^>]+>/g, '').trim() : '';
+
+    // image — first img inside news-img-holder
+    const imgHolderM = html.match(/<div class="news-img-holder">([\s\S]*?)<\/div>/i);
+    let image = null;
+    if (imgHolderM) {
+      const imgM = imgHolderM[1].match(/src=["']([^"']+)["']/i);
+      if (imgM) image = imgM[1].startsWith('http') ? imgM[1] : `${NEWS_BASE}/${imgM[1].replace(/^\//, '')}`;
+    }
+
+    // body — the outer <p> inside news-details-page-inner that contains nested <p> tags
+    const outerPM = html.match(/news-comments">([\s\S]*?)<div class="fb-share/i);
+    let paragraphs = [];
+    if (outerPM) {
+      const rawParas = outerPM[1].match(/<p>([\s\S]*?)<\/p>/gi) || [];
+      paragraphs = rawParas
+        .map(p => p.replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim())
+        .filter(p => p.length > 2);
+    }
+
+    return res.json({ title, date, category, image, paragraphs, url });
+  } catch (err) {
+    console.error('Article fetch error:', err.message);
+    return res.status(500).json({ message: err.message });
+  }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Lectra backend running on:`);

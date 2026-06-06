@@ -5,6 +5,7 @@ import {
   Image, Linking,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
 import BACKEND_URL from '@/constants/api';
 
 interface NewsItem {
@@ -93,7 +94,7 @@ function NewsCard({ item, accent, index }: { item: NewsItem; accent: string; ind
       <TouchableOpacity
         style={styles.card}
         activeOpacity={0.88}
-        onPress={() => Linking.openURL(item.href)}
+        onPress={() => router.push({ pathname: '/news-detail', params: { url: item.href } })}
       >
         {/* image or color placeholder */}
         {item.image ? (
