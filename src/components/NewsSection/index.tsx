@@ -44,7 +44,7 @@ export default function NewsSection() {
         <Text style={styles.heading}>School News</Text>
         <TouchableOpacity
           style={styles.seeAll}
-          onPress={() => Linking.openURL('https://yabatech.edu.ng/yabatechallnews.php')}
+          onPress={() => router.push('/all-news')}
           activeOpacity={0.7}
         >
           <Text style={styles.seeAllText}>See all</Text>
