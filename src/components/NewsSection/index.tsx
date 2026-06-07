@@ -7,6 +7,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import BACKEND_URL from '@/constants/api';
+import { useAppTheme } from '@/context/AppThemeContext';
 
 interface NewsItem {
   title: string;
@@ -15,13 +16,13 @@ interface NewsItem {
   image: string | null;
 }
 
-const CARD_COLORS = ['#6C63FF','#FF6B6B','#4ECDC4','#FFB347','#74B9FF','#00B894'];
-
 export default function NewsSection() {
   const [news, setNews]       = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError]     = useState('');
   const fade  = useRef(new Animated.Value(0)).current;
+  const { accent, surface, text } = useAppTheme();
+  const CARD_COLORS = [accent, '#FF6B6B', '#4ECDC4', '#FFB347', '#74B9FF', '#00B894'];
 
   useEffect(() => {
     fetch(`${BACKEND_URL}/news`)
@@ -41,20 +42,20 @@ export default function NewsSection() {
     <View style={styles.wrap}>
       {/* section heading */}
       <View style={styles.headRow}>
-        <Text style={styles.heading}>School News</Text>
+        <Text style={[styles.heading, { color: text }]}>School News</Text>
         <TouchableOpacity
           style={styles.seeAll}
           onPress={() => router.push('/all-news')}
           activeOpacity={0.7}
         >
-          <Text style={styles.seeAllText}>See all</Text>
-          <Ionicons name="chevron-forward" size={13} color="#6C63FF" />
+          <Text style={[styles.seeAllText, { color: accent }]}>See all</Text>
+          <Ionicons name="chevron-forward" size={13} color={accent} />
         </TouchableOpacity>
       </View>
 
       {loading && (
         <View style={styles.loaderRow}>
-          <ActivityIndicator size="small" color="#6C63FF" />
+          <ActivityIndicator size="small" color={accent} />
         </View>
       )}
 
@@ -70,7 +71,7 @@ export default function NewsSection() {
             contentContainerStyle={styles.scrollRow}
           >
             {news.map((item, i) => (
-              <NewsCard key={i} item={item} accent={CARD_COLORS[i % CARD_COLORS.length]} index={i} />
+              <NewsCard key={i} item={item} accent={CARD_COLORS[i % CARD_COLORS.length]} index={i} cardBg={surface} textColor={text} />
             ))}
           </ScrollView>
         </Animated.View>
@@ -79,7 +80,7 @@ export default function NewsSection() {
   );
 }
 
-function NewsCard({ item, accent, index }: { item: NewsItem; accent: string; index: number }) {
+function NewsCard({ item, accent, index, cardBg, textColor }: { item: NewsItem; accent: string; index: number; cardBg: string; textColor: string }) {
   const scale = useRef(new Animated.Value(0.92)).current;
 
   useEffect(() => {
@@ -92,7 +93,7 @@ function NewsCard({ item, accent, index }: { item: NewsItem; accent: string; ind
   return (
     <Animated.View style={{ transform: [{ scale }] }}>
       <TouchableOpacity
-        style={styles.card}
+        style={[styles.card, { backgroundColor: cardBg }]}
         activeOpacity={0.88}
         onPress={() => router.push({ pathname: '/news-detail', params: { url: item.href } })}
       >
@@ -100,7 +101,7 @@ function NewsCard({ item, accent, index }: { item: NewsItem; accent: string; ind
         {item.image ? (
           <Image source={{ uri: item.image }} style={styles.cardImg} resizeMode="cover" />
         ) : (
-          <View style={[styles.cardImg, styles.cardImgFallback, { backgroundColor: accent + '22' }]}>
+          <View style={[styles.cardImg, styles.cardImgFallback, { backgroundColor: accent + '18' }]}>
             <Ionicons name="newspaper-outline" size={28} color={accent} />
           </View>
         )}
@@ -110,7 +111,7 @@ function NewsCard({ item, accent, index }: { item: NewsItem; accent: string; ind
 
         {/* content */}
         <View style={styles.cardBody}>
-          <Text style={styles.cardTitle} numberOfLines={3}>{item.title}</Text>
+          <Text style={[styles.cardTitle, { color: textColor }]} numberOfLines={3}>{item.title}</Text>
           {!!item.date && (
             <View style={styles.dateRow}>
               <Ionicons name="time-outline" size={11} color="#A0AEC0" />
@@ -135,7 +136,7 @@ const styles = StyleSheet.create({
   },
   heading: { fontSize: 16, fontWeight: '800', color: '#2D3748', letterSpacing: -0.2 },
   seeAll: { flexDirection: 'row', alignItems: 'center', gap: 2 },
-  seeAllText: { fontSize: 13, fontWeight: '600', color: '#6C63FF' },
+  seeAllText: { fontSize: 13, fontWeight: '600' },
 
   loaderRow: { alignItems: 'center', paddingVertical: 24 },
   errorText: { textAlign: 'center', color: '#A0AEC0', fontSize: 13, paddingVertical: 16 },

@@ -6,6 +6,7 @@ import {
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import BACKEND_URL from '@/constants/api';
+import { useAppTheme } from '@/context/AppThemeContext';
 
 interface NewsItem {
   title: string;
@@ -20,6 +21,7 @@ export default function NewsList() {
   const [news, setNews]       = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError]     = useState('');
+  const { accent, accentSoft } = useAppTheme();
 
   useEffect(() => {
     fetch(`${BACKEND_URL}/news`)
@@ -46,7 +48,7 @@ export default function NewsList() {
 
       {loading && (
         <View style={styles.center}>
-          <ActivityIndicator size="large" color="#6C63FF" />
+          <ActivityIndicator size="large" color={accent} />
         </View>
       )}
 
@@ -64,14 +66,14 @@ export default function NewsList() {
           contentContainerStyle={styles.list}
           showsVerticalScrollIndicator={false}
           ItemSeparatorComponent={() => <View style={styles.separator} />}
-          renderItem={({ item, index }) => <NewsRow item={item} index={index} />}
+          renderItem={({ item, index }) => <NewsRow item={item} index={index} accent={accent} accentSoft={accentSoft} />}
           ListFooterComponent={
             <TouchableOpacity
               style={styles.seeMoreBtn}
               activeOpacity={0.8}
-              onPress={() => Linking.openURL('https://yabatech.edu.ng/yabatechallnews.php')}
-            >
-              <Ionicons name="globe-outline" size={16} color="#6C63FF" />
+            onPress={() => Linking.openURL('https://yabatech.edu.ng/yabatechallnews.php')}
+          >
+              <Ionicons name="globe-outline" size={16} color={accent} />
               <Text style={styles.seeMoreText}>See more news on Yabatech website</Text>
               <Ionicons name="open-outline" size={14} color="#A0AEC0" />
             </TouchableOpacity>
@@ -82,7 +84,7 @@ export default function NewsList() {
   );
 }
 
-function NewsRow({ item, index }: { item: NewsItem; index: number }) {
+function NewsRow({ item, index, accent, accentSoft }: { item: NewsItem; index: number; accent: string; accentSoft: string }) {
   const fade  = useRef(new Animated.Value(0)).current;
   const slide = useRef(new Animated.Value(16)).current;
 
@@ -104,8 +106,8 @@ function NewsRow({ item, index }: { item: NewsItem; index: number }) {
         {item.image ? (
           <Image source={{ uri: item.image }} style={styles.thumb} resizeMode="cover" />
         ) : (
-          <View style={[styles.thumb, styles.thumbFallback]}>
-            <Ionicons name="newspaper-outline" size={22} color="#C4BFEA" />
+          <View style={[styles.thumb, styles.thumbFallback, { backgroundColor: accentSoft }]}>
+            <Ionicons name="newspaper-outline" size={22} color={accent} />
           </View>
         )}
 
@@ -159,7 +161,6 @@ const styles = StyleSheet.create({
     width: 68, height: 68, borderRadius: 14, flexShrink: 0,
   },
   thumbFallback: {
-    backgroundColor: '#F3F0FF',
     alignItems: 'center', justifyContent: 'center',
   },
 
@@ -179,6 +180,6 @@ const styles = StyleSheet.create({
     borderTopWidth: 1, borderColor: '#EEF0F5',
   },
   seeMoreText: {
-    flex: 1, fontSize: 14, fontWeight: '600', color: '#6C63FF',
+    flex: 1, fontSize: 14, fontWeight: '600', color: '#14B8A6',
   },
 });

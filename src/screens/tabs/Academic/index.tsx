@@ -8,11 +8,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import type { StudentData } from '@/services/portal';
 import ClassCard from '@/components/ClassCard';
-import BottomNav from '@/components/BottomNav';
+import { useAppTheme } from '@/context/AppThemeContext';
 
 export default function AcademicScreen() {
   const [data, setData] = useState<StudentData | null>(null);
   const fade = useRef(new Animated.Value(0)).current;
+  const { accent, accentSoft, onAccent, background, surface, text, textSecondary, isDark } = useAppTheme();
 
   useEffect(() => {
     AsyncStorage.getItem('student_data').then(raw => {
@@ -25,8 +26,8 @@ export default function AcademicScreen() {
 
   if (!data) {
     return (
-      <View style={s.loader}>
-        <ActivityIndicator size="large" color="#6C63FF" />
+      <View style={[s.loader, { backgroundColor: background }]}>
+        <ActivityIndicator size="large" color={accent} />
       </View>
     );
   }
@@ -45,35 +46,36 @@ export default function AcademicScreen() {
   const isActive = rawStatus.toUpperCase().includes('ACTIVE') &&
                    !rawStatus.toUpperCase().includes('INACTIVE');
 
+  const session     = data.homeStatus?.['Current semester'] ?? data.homeStatus?.['Semester'] ?? '';
   const displayName = name.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
   const firstName   = displayName.split(' ')[0];
   const initials    = name.split(' ').map(w => w[0] ?? '').join('').slice(0, 2).toUpperCase();
 
   return (
-    <View style={s.root}>
-      <StatusBar barStyle="dark-content" backgroundColor="#F7F8FA" />
+    <View style={[s.root, { backgroundColor: background }]}>
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={background} />
 
       <Animated.View style={{ flex: 1, opacity: fade }}>
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={s.scroll}>
 
           {/* ── TOP NAV ── */}
           <View style={s.topNav}>
-            <TouchableOpacity style={s.backBtn} onPress={() => router.replace('/home')} activeOpacity={0.8}>
-              <Ionicons name="arrow-back" size={20} color="#1A202C" />
+            <TouchableOpacity style={[s.backBtn, { backgroundColor: surface }]} onPress={() => router.back()} activeOpacity={0.8}>
+              <Ionicons name="arrow-back" size={20} color={text} />
             </TouchableOpacity>
-            <Text style={s.pageTitle}>Academic</Text>
-            <TouchableOpacity style={s.notifBtn} activeOpacity={0.8}>
-              <Ionicons name="notifications-outline" size={20} color="#1A202C" />
+            <Text style={[s.pageTitle, { color: text }]}>Academic</Text>
+            <TouchableOpacity style={[s.notifBtn, { backgroundColor: surface }]} activeOpacity={0.8}>
+              <Ionicons name="notifications-outline" size={20} color={text} />
             </TouchableOpacity>
           </View>
 
           {/* ── PROFILE ROW ── */}
           <View style={s.profileRow}>
             <View style={s.avatar}>
-              <Text style={s.avatarText}>{initials}</Text>
+              <Text style={[s.avatarText, { color: onAccent }]}>{initials}</Text>
             </View>
             <View style={s.profileInfo}>
-              <Text style={s.welcome}>Welcome,</Text>
+              {!!session && <Text style={s.welcome}>{session}</Text>}
               <Text style={s.name}>{firstName}</Text>
               <Text style={s.dept} numberOfLines={1}>{department}</Text>
             </View>
@@ -82,7 +84,7 @@ export default function AcademicScreen() {
           {/* ── STAT CARDS ── */}
           <View style={s.cards}>
             {/* Courses */}
-            <View style={[s.card, s.cardNavy]}>
+            <View style={[s.card, { backgroundColor: accent }]}>
               <View style={[s.cardIconWrap, { backgroundColor: 'rgba(255,255,255,0.15)' }]}>
                 <Ionicons name="school" size={20} color="#fff" />
               </View>
@@ -100,8 +102,8 @@ export default function AcademicScreen() {
             </View>
 
             {/* Registered / Not Paid */}
-            <View style={[s.card, s.cardWhite]}>
-              <View style={[s.cardIconWrap, { backgroundColor: isActive ? '#EEF9F0' : '#FFF0F0' }]}>
+            <View style={[s.card, s.cardWhite, { backgroundColor: surface }]}>
+              <View style={[s.cardIconWrap, { backgroundColor: isActive ? accentSoft : '#FFF0F0' }]}>
                 <Ionicons
                   name={isActive ? 'checkmark-circle' : 'close-circle'}
                   size={20}
@@ -119,7 +121,7 @@ export default function AcademicScreen() {
 
           {/* ── COURSES ── */}
           <View style={s.section}>
-            <Text style={s.sectionTitle}>Registered Courses</Text>
+            <Text style={[s.sectionTitle, { color: text }]}>Registered Courses</Text>
 
             {courseCount > 0
               ? data.courses.map((course, i) => (
@@ -127,7 +129,7 @@ export default function AcademicScreen() {
                 ))
               : (
                 <View style={s.empty}>
-                  <Ionicons name="school-outline" size={40} color="#C4BFEA" />
+                  <Ionicons name="school-outline" size={40} color={accent} />
                   <Text style={s.emptyTitle}>No courses yet</Text>
                   <Text style={s.emptySub}>Your registered courses will appear here.</Text>
                 </View>
@@ -139,7 +141,6 @@ export default function AcademicScreen() {
         </ScrollView>
       </Animated.View>
 
-      <BottomNav active={1} />
     </View>
   );
 }
@@ -179,7 +180,7 @@ const s = StyleSheet.create({
   },
   avatar: {
     width: 64, height: 64, borderRadius: 32,
-    backgroundColor: '#6C63FF',
+    backgroundColor: '#14B8A6',
     alignItems: 'center', justifyContent: 'center',
   },
   avatarText: { color: '#fff', fontSize: 22, fontWeight: '800' },
@@ -197,7 +198,6 @@ const s = StyleSheet.create({
     flex: 1, borderRadius: 20, padding: 14,
     alignItems: 'flex-start', gap: 8,
   },
-  cardNavy:  { backgroundColor: '#2D2480' },
   cardAmber: { backgroundColor: '#F59E0B' },
   cardWhite: {
     backgroundColor: '#fff',

@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';
+import { useAppTheme } from '@/context/AppThemeContext';
 
 const DAY_NAMES   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 const MONTH_NAMES = ['January','February','March','April','May','June',
@@ -24,6 +25,7 @@ function buildWeek() {
 interface Props { onSelect?: (dayIndex: number) => void; }
 
 export default function WeekStrip({ onSelect }: Props) {
+  const { accent, text, textSecondary, isDark } = useAppTheme();
   const week     = buildWeek();
   const todayIdx = week.findIndex(d => d.isToday);
   const [sel, setSel] = useState(todayIdx >= 0 ? todayIdx : 1);
@@ -52,17 +54,17 @@ export default function WeekStrip({ onSelect }: Props) {
           const active = sel === i;
           return (
             <TouchableOpacity key={i} style={styles.dayCol} onPress={() => pick(i)} activeOpacity={0.7}>
-              <Text style={[styles.dayName, active && styles.dayNameActive]}>{d.short}</Text>
-              <View style={[styles.bubble, active && styles.bubbleActive]}>
-                <Text style={[styles.dateNum, active && styles.dateNumActive]}>{d.date}</Text>
+              <Text style={[styles.dayName, { color: active ? accent : textSecondary }]}>{d.short}</Text>
+              <View style={[styles.bubble, active && { backgroundColor: accent, shadowColor: accent }]}>
+                <Text style={[styles.dateNum, { color: active ? '#fff' : text }]}>{d.date}</Text>
               </View>
-              {d.isToday && <View style={[styles.todayDot, active && styles.todayDotActive]} />}
+              {d.isToday && <View style={[styles.todayDot, active && { backgroundColor: accent }]} />}
             </TouchableOpacity>
           );
         })}
       </View>
 
-      <Text style={styles.selectedLabel}>
+      <Text style={[styles.selectedLabel, { color: text }]}>
         {selDay.short}, {selDay.date} {MONTH_NAMES[selDay.month]}
       </Text>
     </Animated.View>
@@ -88,19 +90,11 @@ const styles = StyleSheet.create({
     color: '#A0AEC0', letterSpacing: 0.2,
   },
   dayNameActive: {
-    color: '#6C63FF',
+    color: '#14B8A6',
   },
   bubble: {
     width: 36, height: 36, borderRadius: 12,
     alignItems: 'center', justifyContent: 'center',
-  },
-  bubbleActive: {
-    backgroundColor: '#6C63FF',
-    shadowColor: '#6C63FF',
-    shadowOpacity: 0.45,
-    shadowOffset: { width: 0, height: 4 },
-    shadowRadius: 8,
-    elevation: 6,
   },
   dateNum:       { fontSize: 15, fontWeight: '700', color: '#4A5568' },
   dateNumActive: { color: '#FFFFFF' },
@@ -108,7 +102,7 @@ const styles = StyleSheet.create({
     width: 5, height: 5, borderRadius: 3,
     backgroundColor: '#CBD5E0',
   },
-  todayDotActive: { backgroundColor: '#6C63FF' },
+  todayDotActive: { backgroundColor: '#14B8A6' },
   selectedLabel: {
     marginTop: 16,
     fontSize: 17, fontWeight: '800',

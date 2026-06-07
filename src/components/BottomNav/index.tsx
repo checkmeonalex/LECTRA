@@ -2,6 +2,7 @@ import React from 'react';
 import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { useAppTheme } from '@/context/AppThemeContext';
 
 const TABS = [
   { icon: 'home',           activeIcon: 'home',   route: '/home'     },
@@ -13,8 +14,9 @@ const TABS = [
 interface Props { active?: number; }
 
 export default function BottomNav({ active = 0 }: Props) {
+  const { accent, surface, accentSoft, isDark } = useAppTheme();
   return (
-    <View style={styles.bar}>
+    <View style={[styles.bar, { backgroundColor: surface, borderTopColor: isDark ? 'rgba(255,255,255,0.06)' : 'transparent' }]}>
       {TABS.map((tab, i) => {
         const isActive = active === i;
         return (
@@ -25,11 +27,11 @@ export default function BottomNav({ active = 0 }: Props) {
             {/* top progress line */}
             <View style={[styles.indicator, isActive && styles.indicatorActive]} />
 
-            <View style={[styles.iconWrap, isActive && styles.iconWrapActive]}>
+            <View style={[styles.iconWrap, isActive && { backgroundColor: accentSoft }]}>
               <Ionicons
                 name={isActive ? tab.activeIcon : tab.icon}
                 size={22}
-                color={isActive ? '#6C63FF' : '#A0AEC0'}
+                color={isActive ? accent : '#A0AEC0'}
               />
             </View>
           </TouchableOpacity>
@@ -42,11 +44,11 @@ export default function BottomNav({ active = 0 }: Props) {
 const styles = StyleSheet.create({
   bar: {
     flexDirection: 'row',
-    backgroundColor: '#FFFFFF',
     paddingBottom: 10,
     paddingHorizontal: 8,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
+    borderTopWidth: 1,
     shadowColor: '#000',
     shadowOpacity: 0.08,
     shadowOffset: { width: 0, height: -4 },
@@ -64,13 +66,13 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   indicatorActive: {
-    backgroundColor: '#6C63FF',
-    shadowColor: '#6C63FF',
+    backgroundColor: '#14B8A6',
+    shadowColor: '#14B8A6',
     shadowOpacity: 0.6,
     shadowOffset: { width: 0, height: 2 },
     shadowRadius: 4,
     elevation: 3,
   },
   iconWrap:       { padding: 6, borderRadius: 14 },
-  iconWrapActive: { backgroundColor: '#F0EEFF' },
+  iconWrapActive: { backgroundColor: '#D9FBF6' },
 });

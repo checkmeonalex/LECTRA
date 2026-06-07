@@ -6,6 +6,7 @@ import {
 import { useLocalSearchParams, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import BACKEND_URL from '@/constants/api';
+import { useAppTheme } from '@/context/AppThemeContext';
 
 interface Article {
   title: string;
@@ -21,6 +22,7 @@ export default function NewsDetail() {
   const [article, setArticle] = useState<Article | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError]     = useState('');
+  const { accent } = useAppTheme();
 
   useEffect(() => {
     if (!url) return;
@@ -50,14 +52,14 @@ export default function NewsDetail() {
             onPress={() => Linking.openURL(article.url)}
             activeOpacity={0.8}
           >
-            <Ionicons name="open-outline" size={18} color="#4ECDC4" />
+            <Ionicons name="open-outline" size={18} color={accent} />
           </TouchableOpacity>
         ) : <View style={styles.shareBtn} />}
       </View>
 
       {loading && (
         <View style={styles.center}>
-          <ActivityIndicator size="large" color="#6C63FF" />
+          <ActivityIndicator size="large" color={accent} />
           <Text style={styles.loadingText}>Loading article…</Text>
         </View>
       )}
@@ -120,7 +122,7 @@ export default function NewsDetail() {
               onPress={() => Linking.openURL(article.url)}
               activeOpacity={0.8}
             >
-              <Ionicons name="globe-outline" size={15} color="#6C63FF" />
+              <Ionicons name="globe-outline" size={15} color={accent} />
               <Text style={styles.openBrowserText}>Open full article in browser</Text>
             </TouchableOpacity>
 
@@ -167,7 +169,7 @@ const styles = StyleSheet.create({
   errorText:   { color: '#A0AEC0', fontSize: 14, textAlign: 'center' },
   retryBtn: {
     marginTop: 8, paddingHorizontal: 24, paddingVertical: 10,
-    backgroundColor: '#6C63FF', borderRadius: 20,
+    backgroundColor: '#14B8A6', borderRadius: 20,
   },
   retryText: { color: '#fff', fontWeight: '700', fontSize: 14 },
 
@@ -196,10 +198,10 @@ const styles = StyleSheet.create({
     gap: 10, marginBottom: 14,
   },
   categoryPill: {
-    backgroundColor: '#ECEAFF',
+    backgroundColor: '#ECFDF8',
     borderRadius: 10, paddingHorizontal: 10, paddingVertical: 4,
   },
-  categoryText: { color: '#6C63FF', fontSize: 11, fontWeight: '700' },
+  categoryText: { color: '#14B8A6', fontSize: 11, fontWeight: '700' },
   dateRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
   dateText: { color: '#A0AEC0', fontSize: 12 },
 
@@ -222,5 +224,5 @@ const styles = StyleSheet.create({
     marginTop: 8, paddingVertical: 14,
     borderTopWidth: 1, borderColor: '#E8ECF0',
   },
-  openBrowserText: { fontSize: 13, fontWeight: '600', color: '#6C63FF' },
+  openBrowserText: { fontSize: 13, fontWeight: '600', color: '#14B8A6' },
 });

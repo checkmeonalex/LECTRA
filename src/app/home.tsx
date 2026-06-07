@@ -1,2 +1,4 @@
-import HomeScreen from '@/screens/tabs/Home';
-export default HomeScreen;
+import { Redirect } from 'expo-router';
+export default function Home() {
+  return <Redirect href="/(tabs)" />;
+}

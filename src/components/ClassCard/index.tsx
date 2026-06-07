@@ -2,11 +2,12 @@ import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import type { Course } from '@/services/portal';
+import { useAppTheme } from '@/context/AppThemeContext';
 
 const PALETTE = [
-  '#6C63FF','#FF6B6B','#4ECDC4','#FFB347',
+  '#FF6B6B','#4ECDC4','#FFB347',
   '#74B9FF','#FD79A8','#00B894','#FDCB6E',
-  '#E17055','#0984E3','#00CEC9','#6C5CE7',
+  '#E17055','#0984E3','#00CEC9','#2D9CDB',
 ];
 
 interface Props {
@@ -17,6 +18,7 @@ interface Props {
 export default function ClassCard({ course, index }: Props) {
   const fade  = useRef(new Animated.Value(0)).current;
   const slide = useRef(new Animated.Value(50)).current;
+  const { accent, accentSoft, surface, text } = useAppTheme();
 
   useEffect(() => {
     Animated.parallel([
@@ -25,27 +27,27 @@ export default function ClassCard({ course, index }: Props) {
     ]).start();
   }, []);
 
-  const color = PALETTE[index % PALETTE.length];
+  const color = index === 0 ? accent : PALETTE[(index - 1 + PALETTE.length) % PALETTE.length];
 
   return (
-    <Animated.View style={[styles.card, { opacity: fade, transform: [{ translateX: slide }] }]}>
+    <Animated.View style={[styles.card, { backgroundColor: surface, opacity: fade, transform: [{ translateX: slide }] }]}>
       <View style={[styles.accent, { backgroundColor: color }]} />
 
       <View style={styles.codeCol}>
-        <View style={[styles.codePill, { backgroundColor: color + '18' }]}>
+        <View style={[styles.codePill, { backgroundColor: color === accent ? accentSoft : color + '18' }]}>
           <Text style={[styles.codeText, { color }]}>{course.code}</Text>
         </View>
       </View>
 
       <View style={styles.middle}>
-        <Text style={styles.title} numberOfLines={2}>{course.title}</Text>
+        <Text style={[styles.title, { color: text }]} numberOfLines={2}>{course.title}</Text>
         <View style={styles.statusRow}>
           <Ionicons name="ellipse" size={6} color={color} />
           <Text style={[styles.status, { color }]}>{course.status}</Text>
         </View>
       </View>
 
-      <View style={[styles.unitCircle, { backgroundColor: color + '18', borderColor: color + '40' }]}>
+      <View style={[styles.unitCircle, { backgroundColor: color === accent ? accentSoft : color + '18', borderColor: color + '40' }]}>
         <Text style={[styles.unitNum, { color }]}>{course.unit}</Text>
         <Text style={[styles.unitLabel, { color }]}>units</Text>
       </View>
@@ -81,7 +83,7 @@ const styles = StyleSheet.create({
   },
   codeText: { fontSize: 12, fontWeight: '800' },
   middle: { flex: 1 },
-  title: { fontSize: 13, fontWeight: '600', color: '#2D3748', marginBottom: 5, lineHeight: 18 },
+  title: { fontSize: 13, fontWeight: '600', marginBottom: 5, lineHeight: 18 },
   statusRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
   status: { fontSize: 11, fontWeight: '500' },
   unitCircle: {

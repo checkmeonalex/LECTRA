@@ -1,16 +1,18 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-
-const ACTIONS = [
-  { label: 'Academic Info', icon: 'school-outline',     color: '#6C63FF', bg: '#EEEEFF' },
-  { label: 'My Courses',    icon: 'book-outline',       color: '#FF6B6B', bg: '#FFEEEE' },
-  { label: 'Fee Status',    icon: 'card-outline',       color: '#00B894', bg: '#E6FAF5' },
-  { label: 'Results',       icon: 'bar-chart-outline',  color: '#FFB347', bg: '#FFF4E5' },
-  { label: 'Timetable',     icon: 'calendar-outline',   color: '#74B9FF', bg: '#EAF4FF' },
-] as const;
+import { router } from 'expo-router';
+import { useAppTheme } from '@/context/AppThemeContext';
 
 export default function QuickActions() {
+  const { accent, accentSoft, surface, text, isDark } = useAppTheme();
+  const ACTIONS = [
+    { label: 'Academic Info', icon: 'school-outline',    color: accent,     bg: accentSoft, route: '/(tabs)/profile' },
+    { label: 'My Courses',    icon: 'book-outline',      color: '#FF6B6B', bg: '#FFEEEE', route: '/academic' },
+    { label: 'Fee Status',    icon: 'card-outline',      color: '#00B894', bg: '#E6FAF5', route: null        },
+    { label: 'Results',       icon: 'bar-chart-outline', color: '#FFB347', bg: '#FFF4E5', route: null        },
+    { label: 'Timetable',     icon: 'calendar-outline',  color: '#74B9FF', bg: '#EAF4FF', route: '/setup-timetable' },
+  ];
   const anims = useRef(ACTIONS.map(() => new Animated.Value(0))).current;
 
   useEffect(() => {
@@ -21,15 +23,19 @@ export default function QuickActions() {
 
   return (
     <View style={styles.wrap}>
-      <Text style={styles.sectionLabel}>Quick Access</Text>
+      <Text style={[styles.sectionLabel, { color: isDark ? '#64748B' : '#718096' }]}>Quick Access</Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
         {ACTIONS.map((action, i) => (
           <Animated.View key={action.label} style={{ opacity: anims[i], transform: [{ scale: anims[i] }] }}>
-            <TouchableOpacity style={styles.pill} activeOpacity={0.75}>
+            <TouchableOpacity
+              style={[styles.pill, { backgroundColor: surface }]}
+              activeOpacity={0.75}
+              onPress={() => action.route && router.push(action.route as never)}
+            >
               <View style={[styles.iconBox, { backgroundColor: action.bg }]}>
-                <Ionicons name={action.icon} size={20} color={action.color} />
+                <Ionicons name={action.icon as any} size={20} color={action.color} />
               </View>
-              <Text style={styles.pillLabel}>{action.label}</Text>
+              <Text style={[styles.pillLabel, { color: text }]}>{action.label}</Text>
             </TouchableOpacity>
           </Animated.View>
         ))}
@@ -41,7 +47,7 @@ export default function QuickActions() {
 const styles = StyleSheet.create({
   wrap: { paddingTop: 24, paddingBottom: 4 },
   sectionLabel: {
-    fontSize: 13, fontWeight: '700', color: '#718096',
+    fontSize: 13, fontWeight: '700',
     textTransform: 'uppercase', letterSpacing: 0.8,
     paddingHorizontal: 20, marginBottom: 14,
   },
